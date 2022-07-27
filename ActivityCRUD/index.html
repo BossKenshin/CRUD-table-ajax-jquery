@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>CRUD ACTIVITY</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+        crossorigin="anonymous"></script>
+
+    <!-- jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+</head>
+
+<body>
+
+
+    <template id="row-template">
+        <tr id="row-table">
+            <td scope="row" class="id">1</th>
+            <td class="name">Mark</td>
+            <td class="actions">
+                <button class="btn btn-success" id="update-id" onclick="getValuetoUpdate(this.getAttribute('data-product-id'), this.getAttribute('data-product-name'))" data-bs-toggle="modal" data-bs-target="#updatemodal">Update</button>
+                <button class="btn btn-danger" id="delete-id" onclick="getValuetoDelete(this.getAttribute('data-product-id'))" data-bs-toggle="modal" data-bs-target="#deletemodal">Delete</button>
+
+            </td>
+        </tr>
+    </template>
+
+    <div class="container pt-3">
+
+        <button class="btn btn-primary" id="create" data-bs-toggle="modal" data-bs-target="#createnew">Add New Category</button>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="body-table">
+
+                
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="modal fade" id="createnew" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Create Category
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <form name="form1" id="form-create">
+
+                     <div class="mb-3">
+                        <label for="categoryName" >Category</label>
+                        <input type="text" name="categoryName" class="form-control" id="categoryName" placeholder="Enter new category">
+                  </div>
+            </form>
+           
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveCategory">Save</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updatemodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Update Category
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <form name="form1" id="form-create">
+
+                     <div class="mb-3">
+                        <input type="number" name="categoryidUpdate" class="form-control" id="categoryIdUpdate" hidden>
+                        <label for="newcategoryName" >Category</label>
+                        <input type="text" name="newcategoryName" class="form-control" id="newCategoryName" placeholder="Enter new category">
+                  </div>
+            </form>
+           
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveChanges">Save Changes</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deletemodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="exampleModalLabel">
+                    Delete Category Confirmation
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <form name="form1" id="form-delete">
+
+                     <div class="mb-3">
+                        <label class="h5"for="categoryName" >Are you sure you want to delete this category?</label>
+                        <input type="number" name="categoryid" class="form-control" id="categoryId" hidden>
+                  </div>
+            </form>
+           
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteCategory">Yes</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+<script>
+
+
+loadCategories();
+
+function loadCategories(){    
+        $(document).ready(function() {
+            $.ajax({
+                url: "fetch.php",
+                success: function(data) {
+
+                    var json = JSON.parse(data);
+                    console.log(json);
+
+
+                  // get template
+                        const template = document.querySelector("#row-template");
+
+                        //get the parent element
+                        const parent = document.querySelector(".body-table");
+
+                        $('.body-table').empty();
+
+
+                    for (let i = 0; i < json.length; i++) {
+
+                        //clone the template
+                        let clone = template.content.cloneNode(true);
+
+                        clone.querySelector(".id").innerHTML = json[i].id;
+                        clone.querySelector(".name").innerHTML = json[i].name;
+                        clone.querySelector("#update-id").dataset.productId = json[i].id;
+                        clone.querySelector("#update-id").dataset.productName = json[i].name;
+
+
+                        clone.querySelector("#delete-id").dataset.productId = json[i].id;
+
+
+                        //apppend
+                        parent.append(clone);
+                    }
+
+                }
+
+
+            })
+
+        });
+    }
+
+
+
+    $("#btnSaveCategory").click(function(){
+
+
+        var name = document.querySelector("#categoryName").value;
+        console.log(name);
+            $.ajax({
+                url  : "createcategory.php",
+                type : "GET",
+                data :  {
+                    name : name
+                }
+            })
+            .done(function(data){
+                let result = JSON.parse(data);
+
+                if(result.res == "success"){
+                    // alert("done saving data");
+                    loadCategories();
+                    $('#createnew').modal('hide');
+                    document.querySelector("#categoryName").value = "";
+                }else{
+                    alert("Error, Something happened");
+                }
+            });
+        });
+
+
+
+        
+
+    $("#btnSaveChanges").click(function(){
+
+var id = document.querySelector("#categoryIdUpdate").value;
+var name = document.querySelector("#newCategoryName").value;
+console.log(name);
+    $.ajax({
+        url  : "updatecategory.php",
+        type : "GET",
+        data :  {
+            id : id,
+            name : name
+        }
+    })
+    .done(function(data){
+        let result = JSON.parse(data);
+
+        if(result.res == "success"){
+            // alert("done saving data");
+            loadCategories();
+            $('#updatemodal').modal('hide');
+            document.querySelector("#newCategoryName").value = "";
+            document.querySelector("#categoryIdUpdate").value = "";
+
+        }else{
+            alert("Error, Something happened");
+        }
+    });
+});
+
+
+$("#btnDeleteCategory").click(function(){
+
+var id = document.querySelector("#categoryId").value;
+
+$.ajax({
+        url  : "deletecategory.php",
+        type : "GET",
+        data :  {
+            id : id
+        }
+    })
+    .done(function(data){
+        let result = JSON.parse(data);
+
+        if(result.res == "success"){
+            // alert("done saving data");
+            loadCategories();
+            $('#deletemodal').modal('hide');
+            document.querySelector("#categoryId").value = "";
+
+        }else{
+            alert("Error, Something happened");
+        }
+    });
+});
+
+
+
+
+
+
+        function getValuetoUpdate(valueId, valueName){
+
+
+
+                $("#categoryIdUpdate").val(valueId);
+                $("#newCategoryName").val(valueName);
+
+            // $.ajax({
+            //     url  : "getsinglecategory.php",
+            //     type : "GET",
+            //     data :  {
+            //         id : value
+            //     }
+            // })
+            // .done(function(data){
+            //     let result = JSON.parse(data);
+            //     $("#categoryIdUpdate").val(result[0].id);
+            //     $("#newCategoryName").val(result[0].name);
+            
+            // });
+
+
+        }
+
+
+
+        
+        function getValuetoDelete(valueId){
+
+
+            $("#categoryId").val(valueId);
+
+        // $.ajax({
+        //     url  : "getsinglecategory.php",
+        //     type : "GET",
+        //     data :  {
+        //         id : value
+        //     }
+        // })
+        // .done(function(data){
+        //     let result = JSON.parse(data);
+        //     $("#categoryId").val(result[0].id);
+
+        // });
+
+
+        }
+
+
+
+
+</script>
+</body>
+
+</html>
